@@ -1,0 +1,49 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Montador de Looks";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary">Montador de Looks Inteligente</h1>
+        <p class="lead text-muted">Precisa de inspiração? Descreva a ocasião e nós criamos o look perfeito para você.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-3 mb-4">
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-5">
+                            <label class="form-label">Para qual ocasião?</label>
+                            <input type="text" class="form-control" placeholder="Ex: Trabalho, festa, um jantar casual...">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Como está o clima?</label>
+                            <input type="text" class="form-control" placeholder="Ex: Ensolarado, frio, chuvoso...">
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-primary fw-bold">Gerar Look</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <h4>✨ Sugestão de Look para "Jantar Casual" ✨</h4>
+                <div class="d-flex justify-content-center gap-3 my-4">
+                    <div class="card shadow-sm"><img src="/images/pecas/jaqueta-couro.jpg" class="rounded" width="150" alt="Jaqueta"></div>
+                    <div class="card shadow-sm"><img src="/images/pecas/camiseta-branca.jpg" class="rounded" width="150" alt="Camiseta"></div>
+                    <div class="card shadow-sm"><img src="/images/pecas/jeans-preto.jpg" class="rounded" width="150" alt="Jeans"></div>
+                    <div class="card shadow-sm"><img src="/images/pecas/bota.jpg" class="rounded" width="150" alt="Bota"></div>
+                </div>
+                <div>
+                    <button class="btn btn-success">Amei! Salvar Look</button>
+                    <button class="btn btn-outline-secondary">Gerar Outra Opção</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

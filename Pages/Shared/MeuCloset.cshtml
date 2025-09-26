@@ -1,0 +1,62 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Meu Guarda-Roupa";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5 fw-bold text-primary">Meu Guarda-Roupa</h1>
+        <button class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#add-item-modal">
+            + Adicionar Peça
+        </button>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <select class="form-select">
+                <option selected>Tipo de Peça (Todos)</option>
+                <option>Camisa</option>
+                <option>Calça</option>
+                <option>Vestido</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select">
+                <option selected>Cor (Todas)</option>
+                <option>Branco</option>
+                <option>Preto</option>
+                <option>Azul</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row row-cols-2 row-cols-md-4 g-4">
+        
+       
+    </div>
+    <div class="modal fade" id="add-item-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Nova Peça</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <p class="text-muted">Faça o upload da foto e deixe nossa IA analisar a peça para você!</p>
+                        <input type="file" class="form-control mb-3">
+                        <input type="text" class="form-control mb-2" placeholder="Nome da Peça (Ex: Camisa de Linho Branca)">
+                        <input type="text" class="form-control mb-2" placeholder="Tipo (preenchido pela IA: Camisa)">
+                        <input type="text" class="form-control mb-2" placeholder="Cor (preenchido pela IA: Branco)">
+                        <input type="text" class="form-control mb-2" placeholder="Estilo (preenchido pela IA: Casual, Verão)">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar Peça</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

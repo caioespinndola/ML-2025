@@ -1,12 +1,10 @@
 using Microsoft.ML;
 using ML_2025.Models;
-using ML_2025.Services;
+using ML_2025.Services; 
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddRazorPages();
-
 
 var pastaModelos = Path.Combine(AppContext.BaseDirectory, "MLModels");
 if (!File.Exists(Path.Combine(pastaModelos, "model.zip")))
@@ -17,8 +15,10 @@ var modelPath = Path.Combine(pastaModelos, "model.zip");
 var model = mlContext.Model.Load(modelPath, out _);
 var engine = mlContext.Model.CreatePredictionEngine<SentimentData, SentimentPrediction>(model);
 
-
 builder.Services.AddSingleton(engine);
+
+//  REGISTRA O SERVIÇO DE LOG AQUI
+builder.Services.AddSingleton<JsonLogService>();
 
 var app = builder.Build();
 
@@ -32,10 +32,17 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
-app.MapRazorPages(); 
+app.MapRazorPages();
 
-app.MapPost("/predict", (PredictRequest request, PredictionEngine<SentimentData, SentimentPrediction> engine) =>
+//  MODIFICA O ENDPOINT "/predict"
+app.MapPost("/predict", async (PredictRequest request,
+                              PredictionEngine<SentimentData, SentimentPrediction> engine,
+                              JsonLogService logService) => 
 {
+    // Adiciona o log ANTES de fazer a predição
+    await logService.AdicionarLogAsync(request.Text);
+
+    
     var prediction = engine.Predict(new SentimentData { Text = request.Text });
     return Results.Ok(prediction);
 });

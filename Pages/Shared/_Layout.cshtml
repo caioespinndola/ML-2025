@@ -5,19 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - IA Closet</title>
 
-  
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-  
+    <!-- Fontes do Google (Você já tinha) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- CSS (Bootstrap e Site) -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- ==== ADICIONADO AQUI O NOVO CSS DO CHAT ==== -->
+    <link rel="stylesheet" href="~/css/chat-style.css" asp-append-version="true" />
+    <!-- ============================================== -->
+
     <link rel="stylesheet" href="~/ML_2025.styles.css" asp-append-version="true" />
 </head>
 <body>
-    
+    <!--
+      O body e o header não precisam de mudança.
+      O JavaScript que vou passar vai achar o 'id="theme-toggle"'
+      e fazer a mágica.
+    -->
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
@@ -50,7 +58,7 @@
         </nav>
     </header>
 
-    
+
     <main role="main" class="container pb-3">
         @RenderBody()
     </main>
@@ -62,7 +70,7 @@
         </div>
     </footer>
 
-   
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

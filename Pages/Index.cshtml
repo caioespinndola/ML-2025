@@ -11,86 +11,84 @@
     </div>
 
     <div class="row g-5">
-        <div class="col-lg-6">
-            <div class="card shadow-lg border-0 rounded-3 h-100">
-                <div class="card-body p-4">
-                    <h4 class="card-title text-center mb-3">🔍 Analisador de Looks</h4>
-                    <ul class="nav nav-pills nav-fill mb-3" id="analysis-tab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="text-tab" data-bs-toggle="pill" data-bs-target="#text-pane" type="button" role="tab">Por Texto</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="image-tab" data-bs-toggle="pill" data-bs-target="#image-pane" type="button" role="tab">Por Imagem</button>
-                        </li>
-                    </ul>
 
-                    <div class="tab-content" id="analysis-tab-content">
-                        <div class="tab-pane fade show active" id="text-pane" role="tabpanel">
+        <div class="col-lg-6 d-flex">
+            <div class="chat-container shadow-lg">
 
-                            <form id="form-analise-texto">
-                                <textarea asp-for="InputText" id="input-analise-texto" class="form-control shadow-sm" rows="4" placeholder="Ex: Calça de alfaiataria bege, camisa de linho branca e sandálias de couro..."></textarea>
-
-                                <button type="submit" id="btn-analisar-texto" class="btn btn-primary w-100 fw-bold mt-3">
-                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                    Analisar Estilo
-                                </button>
-                            </form>
-                        </div>
-                        <div class="tab-pane fade" id="image-pane" role="tabpanel">
-                            <form method="post" enctype="multipart/form-data">
-                                <button type="submit" class="btn btn-primary w-100 fw-bold">Analisar Imagem</button>
-                            </form>
-                        </div>
+                <div class="chat-history" id="chat-history">
+                    <div class="chat-bubble ai">
+                        Olá! Descreva seu look e eu te ajudo a analisar.
                     </div>
-
-                    <div id="resultado-analise" class="mt-4">
-                    </div>
-
                 </div>
+
+                <form class="chat-input-area" id="form-analise-texto">
+                    <input type="text" id="input-analise-texto" class="chat-input-bar" placeholder="Ex: Calça de alfaiataria bege e camisa de linho...">
+
+                    <button type="submit" id="btn-analisar-texto" class="chat-send-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none" /><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
+                    </button>
+                </form>
+
             </div>
         </div>
-
         <div class="col-lg-6">
+            <div class="card shadow-lg border-0 rounded-3 mb-4">
+                <div class="card-body p-4 text-center">
+                    <h4 class="card-title mb-3">☀️ Look do Dia</h4>
+                    <p class="text-muted">Com base no clima de hoje (24°C, Ensolarado) e nas suas peças, sugerimos:</p>
+                    <div class="d-flex justify-content-center gap-3 my-3">
+                        <img src="/images/pecas/camisa-linho.jpg" class="rounded shadow-sm" width="100" alt="Camisa de linho">
+                        <img src="/images/pecas/calca-bege.jpg" class="rounded shadow-sm" width="100" alt="Calça bege">
+                        <img src="/images/pecas/sandalia-couro.jpg" class="rounded shadow-sm" width="100" alt="Sandália de couro">
+                    </div>
+                    <a href="/MontadorDeLooks" class="btn btn-outline-primary">Ver outras combinações</a>
+                </div>
+            </div>
+
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-body p-4 text-center">
+                    <h4 class="card-title mb-3">Meu Guarda-Roupa</h4>
+                    <p class="lead">Você tem <strong>87 peças</strong> catalogadas.</p>
+                    <p class="text-muted">Adicione suas roupas para receber sugestões personalizadas e inteligentes.</p>
+                    <a href="/MeuGuardaRoupa" class="btn btn-primary fw-bold">Acessar Meu Guarda-Roupa</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        // Aguarda o documento carregar
         document.addEventListener("DOMContentLoaded", function() {
 
-            // Pega os elementos do formulário
+            // Pega os novos elementos do chat
+            const chatHistory = document.getElementById("chat-history");
             const formAnalise = document.getElementById("form-analise-texto");
             const inputTexto = document.getElementById("input-analise-texto");
             const btnAnalise = document.getElementById("btn-analisar-texto");
-            const resultadoDiv = document.getElementById("resultado-analise");
-            const spinner = btnAnalise.querySelector(".spinner-border");
 
-            // Adiciona um "ouvinte" para o envio do formulário
+            // --- Lógica de Envio do Chat ---
             formAnalise.addEventListener("submit", async function(e) {
+                e.preventDefault(); // Impede o recarregamento da página
 
-                // 1. Impede o recarregamento da página
-                e.preventDefault();
+                const userText = inputTexto.value.trim();
+                if (userText === "") return; // Não envia se estiver vazio
 
-                // 2. Mostra o spinner e desabilita o botão
-                spinner.classList.remove("d-none");
+                // 1. Adiciona o balão do usuário
+                appendBubble(userText, 'user');
+                inputTexto.value = ""; // Limpa o input
                 btnAnalise.disabled = true;
-                resultadoDiv.innerHTML = ""; // Limpa resultado anterior
 
-                // 3. Prepara os dados para enviar para a API
-                const dados = {
-                    text: inputTexto.value
-                };
+                // 2. Adiciona o "digitando..." (loader)
+                appendLoader();
+
+                // 3. Prepara e envia os dados para a API
+                const dados = { text: userText };
 
                 try {
-                    // 4. Chama a API /predict que criamos (e que tem o log!)
                     const response = await fetch("/predict", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            // Adicione headers anti-falsificação se necessário
-                        },
+                        headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(dados)
                     });
 
@@ -98,37 +96,78 @@
                         throw new Error("Erro na rede: " + response.statusText);
                     }
 
-                    // 5. Pega a resposta (a predição)
                     const prediction = await response.json();
 
-                    // 6. Constrói o HTML do resultado (igual ao que você tinha)
-                    const isStylish = prediction.predictedLabel;
-                    const alertClass = isStylish ? "alert-success" : "alert-warning";
-                    const title = isStylish ? "Look Aprovado! 😎" : "Ponto de Atenção! 🤔";
-                    const probability = (prediction.probability * 100).toFixed(1) + "%"; // Formata para porcentagem
-                    const suggestion = prediction.suggestion || "Tudo certo!"; // (Seu modelo precisa retornar isso)
+                    // 4. Formata a resposta da IA
+                    const aiResponseHtml = formatAiResponse(prediction);
 
-                    const htmlResultado = `
-                        <div class="alert ${alertClass} shadow-sm">
-                            <h4 class="alert-heading">${title}</h4>
-                            <hr />
-                            <p>${suggestion}</p> <small class="text-muted">Confiança do modelo: ${probability}</small>
-                        </div>
-                    `;
-
-                    // 7. Exibe o HTML na página
-                    resultadoDiv.innerHTML = htmlResultado;
+                    // 5. Remove o loader e adiciona a resposta da IA
+                    removeLoader();
+                    appendBubble(aiResponseHtml, 'ai');
 
                 } catch (error) {
-                    // 8. Mostra um erro se a API falhar
                     console.error("Falha ao analisar:", error);
-                    resultadoDiv.innerHTML = `<div class="alert alert-danger">Ops! Algo deu errado ao tentar analisar.</div>`;
+                    removeLoader();
+                    appendBubble("Ops! Algo deu errado ao tentar analisar. Tente novamente.", 'ai');
                 } finally {
-                    // 9. Esconde o spinner e re-abilita o botão
-                    spinner.classList.add("d-none");
                     btnAnalise.disabled = false;
                 }
             });
+
+            // --- Funções Auxiliares ---
+
+            // Função para adicionar um balão de chat
+            function appendBubble(content, type) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('chat-bubble', type);
+                bubble.innerHTML = content; // Usamos innerHTML para renderizar o HTML da resposta
+                chatHistory.appendChild(bubble);
+                scrollToBottom();
+            }
+
+            // Função para adicionar o loader
+            function appendLoader() {
+                const loaderHtml = `
+                    <div class="chat-bubble ai loading" id="loader">
+                        <div class="gemini-loader">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                `;
+                chatHistory.innerHTML += loaderHtml;
+                scrollToBottom();
+            }
+
+            // Função para remover o loader
+            function removeLoader() {
+                const loader = document.getElementById("loader");
+                if (loader) {
+                    loader.remove();
+                }
+            }
+
+            // Função para formatar a resposta da IA (vinda do JSON)
+            function formatAiResponse(prediction) {
+                const isStylish = prediction.predictedLabel;
+                const title = isStylish ? "Look Aprovado! 😎" : "Ponto de Atenção! 🤔";
+                const probability = (prediction.probability * 100).toFixed(1) + "%";
+                // IMPORTANTE: Seu JSON de resposta precisa ter a propriedade "suggestion"
+                const suggestion = prediction.suggestion || (isStylish ? "Você arrasou na combinação!" : "Que tal tentar alguns ajustes?");
+
+                // Retorna o HTML formatado para o balão da IA
+                return `
+                    <h4 style="margin-top:0; margin-bottom: 10px;">${title}</h4>
+                    <p style="margin-bottom: 12px;">${suggestion}</p>
+                    <small style="opacity: 0.7;">Confiança do modelo: ${probability}</small>
+                `;
+            }
+
+            // Função para rolar o chat para o final
+            function scrollToBottom() {
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
         });
     </script>
 }

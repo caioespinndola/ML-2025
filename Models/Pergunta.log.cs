@@ -7,7 +7,8 @@ namespace ML_2025.Models
     {
         public Guid Id { get; set; }
         public DateTime Timestamp { get; set; }
-        public string Pergunta { get; set; }
-        
-    }
+        public string Pergunta { get; set; } = string.Empty;
+   
+
+}
 }

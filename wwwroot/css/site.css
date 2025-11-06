@@ -1,45 +1,49 @@
-﻿/* Estilo de Chat inspirado no Google/Gemini
-  Atualizado com Dark Mode e Fonte 'Inter'
-*/
+﻿/* Estilo de Chat inspirado no Google/Gemini */
 
 :root {
-    /* Variáveis de Cor (Light Mode) */
+    /* Cores do Tema Light (Padrão) */
     --google-blue: #1a73e8;
+    --google-grey-light: #f1f3f4;
+    --google-grey-medium: #e8eaed;
+    --google-grey-dark: #bdc1c6;
     --text-color: #3c4043;
-    --text-color-light: #5f6368;
     --bg-color: #ffffff;
-    --bg-color-secondary: #f1f3f4;
-    --border-color: #e0e0e0;
-    --chat-ai-bg: #f8f9fa;
+    --chat-ai-bg: #ffffff;
     --chat-user-bg: #e6f0ff;
-    --shadow-color: rgba(60, 64, 66, 0.08);
-    --font-family: 'Inter', sans-serif; /* Usando a fonte do seu Layout */
+    --border-color: #e0e0e0;
 }
 
+/* Estilização para o Dark Mode */
 body.dark-mode {
-    /* Variáveis de Cor (Dark Mode) */
-    --google-blue: #8ab4f8; /* Azul claro do Google */
+    --google-blue: #8ab4f8; /* Azul mais claro para dark mode */
+    --google-grey-light: #282a2d;
+    --google-grey-medium: #3c4043;
+    --google-grey-dark: #5f6368;
     --text-color: #e8eaed;
-    --text-color-light: #bdc1c6;
-    --bg-color: #202124; /* Fundo escuro do Google */
-    --bg-color-secondary: #303134;
-    --border-color: #3c4043;
+    --bg-color: #202124;
     --chat-ai-bg: #303134;
-    --chat-user-bg: #283a54; /* Azul escuro */
-    --shadow-color: rgba(0, 0, 0, 0.3);
+    --chat-user-bg: #28354a;
+    --border-color: #5f6368;
+}
+
+/* Fonte principal (do seu _Layout.cshtml) */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 /* O contêiner principal do chat */
 .chat-container {
-    font-family: var(--font-family);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     background: var(--bg-color);
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 600px;
-    box-shadow: 0 1px 3px var(--shadow-color);
+    width: 100%; /* Ocupa 100% do col-lg-8 */
+    min-height: 70vh; /* Ocupa 70% da altura da tela */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -61,7 +65,7 @@ body.dark-mode {
     line-height: 1.5;
     font-size: 0.95rem;
     word-wrap: break-word;
-    transition: background-color 0.3s, color 0.3s;
+    transition: background-color 0.3s;
 }
 
     /* Balão da IA (esquerda) */
@@ -69,10 +73,10 @@ body.dark-mode {
         background-color: var(--chat-ai-bg);
         color: var(--text-color);
         border: 1px solid var(--border-color);
-        box-shadow: 0 1px 2px var(--shadow-color);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         align-self: flex-start;
         border-top-left-radius: 4px;
-        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        position: relative; /* Para o feedback */
     }
 
     /* Balão do Usuário (direita) */
@@ -100,20 +104,19 @@ body.dark-mode {
 }
 
 .chat-input-bar {
-    font-family: var(--font-family);
     flex-grow: 1;
     border: none;
-    background: var(--bg-color-secondary);
+    background: var(--google-grey-light);
     border-radius: 24px;
     padding: 14px 20px;
     font-size: 1rem;
     color: var(--text-color);
     outline: none;
-    transition: background-color 0.2s, color 0.3s;
+    transition: background-color 0.2s;
 }
 
     .chat-input-bar:focus {
-        background-color: var(--border-color);
+        background-color: var(--google-grey-medium);
     }
 
 .chat-send-btn {
@@ -130,7 +133,7 @@ body.dark-mode {
 }
 
     .chat-send-btn:hover:not(:disabled) {
-        background-color: var(--bg-color-secondary);
+        background-color: var(--google-grey-light);
     }
 
     .chat-send-btn:disabled {
@@ -143,11 +146,12 @@ body.dark-mode {
         transition: fill 0.3s;
     }
 
+
 /* Animação de Loading (Pontinhos) */
 .chat-bubble.loading {
     align-self: flex-start;
     padding: 20px;
-    background-color: var(--chat-ai-bg);
+    background: var(--chat-ai-bg);
 }
 
 .gemini-loader {
@@ -162,23 +166,21 @@ body.dark-mode {
         animation: bounce 1.4s infinite ease-in-out both;
     }
 
-        /* Cores do Google */
         .gemini-loader .dot:nth-child(1) {
             animation-delay: -0.32s;
-            background-color: #8ab4f8;
+            background-color: #4285F4;
         }
         /* Azul */
         .gemini-loader .dot:nth-child(2) {
             animation-delay: -0.16s;
-            background-color: #f4b400;
+            background-color: #DB4437;
         }
-        /* Amarelo */
+        /* Vermelho */
         .gemini-loader .dot:nth-child(3) {
             animation-delay: 0s;
-            background-color: #0f9d58;
+            background-color: #0F9D58;
         }
 /* Verde */
-
 
 @keyframes bounce {
     0%, 80%, 100% {
@@ -189,3 +191,54 @@ body.dark-mode {
         transform: scale(1.0);
     }
 }
+
+/* ======================================= */
+/* === ESTILOS DO FEEDBACK E REGENERATE == */
+/* ======================================= */
+
+.feedback-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color);
+}
+
+.feedback-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    border-radius: 50%;
+    opacity: 0.6;
+    transition: all 0.2s;
+}
+
+    .feedback-btn:hover:not(:disabled) {
+        opacity: 1;
+        transform: scale(1.2);
+        background-color: var(--google-grey-light);
+    }
+
+    .feedback-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.3;
+    }
+
+    /* Estilo específico para o botão de regenerar */
+    .feedback-btn.regenerate {
+        font-size: 1.1rem; /* Um pouco maior */
+    }
+
+    .feedback-btn.thumb-up.selected {
+        opacity: 1;
+        transform: scale(1.1);
+        color: var(--google-blue); /* Fica azul ao clicar */
+    }
+
+    .feedback-btn.thumb-down.selected {
+        opacity: 1;
+        transform: scale(1.1);
+        color: #DB4437; /* Fica vermelho ao clicar */
+    }

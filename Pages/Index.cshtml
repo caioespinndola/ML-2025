@@ -10,11 +10,15 @@
         <p class="lead text-muted">Seu assistente de estilo pessoal, pronto para te ajudar a brilhar.</p>
     </div>
 
-    <div class="row g-5">
+    <!-- MUDANÇA DE LAYOUT:
+         Removemos a 'row g-5' e substituímos por uma
+         linha centralizada com 8 colunas para o chat.
+    -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8 d-flex">
 
-        <div class="col-lg-6 d-flex">
+            <!-- O HTML do Chat Container não muda -->
             <div class="chat-container shadow-lg">
-
                 <div class="chat-history" id="chat-history">
                     <div class="chat-bubble ai">
                         Olá! Descreva seu look e eu te ajudo a analisar.
@@ -23,7 +27,6 @@
 
                 <form class="chat-input-area" id="form-analise-texto">
                     <input type="text" id="input-analise-texto" class="chat-input-bar" placeholder="Ex: Calça de alfaiataria bege e camisa de linho...">
-
                     <button type="submit" id="btn-analisar-texto" class="chat-send-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none" /><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
                     </button>
@@ -31,59 +34,51 @@
 
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="card shadow-lg border-0 rounded-3 mb-4">
-                <div class="card-body p-4 text-center">
-                    <h4 class="card-title mb-3">☀️ Look do Dia</h4>
-                    <p class="text-muted">Com base no clima de hoje (24°C, Ensolarado) e nas suas peças, sugerimos:</p>
-                    <div class="d-flex justify-content-center gap-3 my-3">
-                        <img src="/images/pecas/camisa-linho.jpg" class="rounded shadow-sm" width="100" alt="Camisa de linho">
-                        <img src="/images/pecas/calca-bege.jpg" class="rounded shadow-sm" width="100" alt="Calça bege">
-                        <img src="/images/pecas/sandalia-couro.jpg" class="rounded shadow-sm" width="100" alt="Sandália de couro">
-                    </div>
-                    <a href="/MontadorDeLooks" class="btn btn-outline-primary">Ver outras combinações</a>
-                </div>
-            </div>
-
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-body p-4 text-center">
-                    <h4 class="card-title mb-3">Meu Guarda-Roupa</h4>
-                    <p class="lead">Você tem <strong>87 peças</strong> catalogadas.</p>
-                    <p class="text-muted">Adicione suas roupas para receber sugestões personalizadas e inteligentes.</p>
-                    <a href="/MeuGuardaRoupa" class="btn btn-primary fw-bold">Acessar Meu Guarda-Roupa</a>
-                </div>
-            </div>
-        </div>
     </div>
+    <!-- FIM DA MUDANÇA DE LAYOUT -->
+
 </div>
 
+<!-- ======================================================= -->
+<!-- JAVASCRIPT ATUALIZADO (com Feedback e Regenerate)     -->
+<!-- ======================================================= -->
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
-            // Pega os novos elementos do chat
             const chatHistory = document.getElementById("chat-history");
             const formAnalise = document.getElementById("form-analise-texto");
             const inputTexto = document.getElementById("input-analise-texto");
             const btnAnalise = document.getElementById("btn-analisar-texto");
 
+            // Variável para guardar a última pergunta do usuário
+            let lastUserPrompt = "";
+
             // --- Lógica de Envio do Chat ---
             formAnalise.addEventListener("submit", async function(e) {
-                e.preventDefault(); // Impede o recarregamento da página
-
+                e.preventDefault();
                 const userText = inputTexto.value.trim();
-                if (userText === "") return; // Não envia se estiver vazio
+                if (userText === "") return;
 
-                // 1. Adiciona o balão do usuário
+                // Salva a pergunta do usuário para a função "Regenerate"
+                lastUserPrompt = userText;
+
                 appendBubble(userText, 'user');
-                inputTexto.value = ""; // Limpa o input
+                inputTexto.value = "";
                 btnAnalise.disabled = true;
 
-                // 2. Adiciona o "digitando..." (loader)
+                // Chama a função principal de chat
+                await getAiResponse(userText);
+
+                btnAnalise.disabled = false;
+                inputTexto.focus();
+            });
+
+            // --- Função Principal para buscar Resposta da IA ---
+            async function getAiResponse(prompt) {
                 appendLoader();
 
-                // 3. Prepara e envia os dados para a API
-                const dados = { text: userText };
+                const dados = { text: prompt };
 
                 try {
                     const response = await fetch("/predict", {
@@ -98,30 +93,37 @@
 
                     const prediction = await response.json();
 
-                    // 4. Formata a resposta da IA
+                    // Formata a resposta da IA (com os novos botões)
                     const aiResponseHtml = formatAiResponse(prediction);
 
-                    // 5. Remove o loader e adiciona a resposta da IA
                     removeLoader();
-                    appendBubble(aiResponseHtml, 'ai');
+                    // Passa o prompt (pergunta) para a função de feedback saber o contexto
+                    appendBubble(aiResponseHtml, 'ai', prompt);
 
                 } catch (error) {
                     console.error("Falha ao analisar:", error);
                     removeLoader();
-                    appendBubble("Ops! Algo deu errado ao tentar analisar. Tente novamente.", 'ai');
-                } finally {
-                    btnAnalise.disabled = false;
+                    appendBubble("Ops! Algo deu errado. Tente novamente.", 'ai');
                 }
-            });
+            }
+
 
             // --- Funções Auxiliares ---
 
             // Função para adicionar um balão de chat
-            function appendBubble(content, type) {
+            function appendBubble(content, type, userQuestionContext = null) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('chat-bubble', type);
-                bubble.innerHTML = content; // Usamos innerHTML para renderizar o HTML da resposta
+                bubble.innerHTML = content;
                 chatHistory.appendChild(bubble);
+
+                // Se for um balão da IA, adiciona os 'escutadores' de feedback
+                if (type === 'ai' && userQuestionContext) {
+                    // Passa o HTML da resposta para salvar no log de feedback
+                    const responseHtmlForLog = bubble.querySelector('.ai-response-content').innerHTML;
+                    addBubbleListeners(bubble, userQuestionContext, responseHtmlForLog);
+                }
+
                 scrollToBottom();
             }
 
@@ -129,11 +131,7 @@
             function appendLoader() {
                 const loaderHtml = `
                     <div class="chat-bubble ai loading" id="loader">
-                        <div class="gemini-loader">
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                        </div>
+                        <div class="gemini-loader"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
                     </div>
                 `;
                 chatHistory.innerHTML += loaderHtml;
@@ -143,31 +141,90 @@
             // Função para remover o loader
             function removeLoader() {
                 const loader = document.getElementById("loader");
-                if (loader) {
-                    loader.remove();
-                }
+                if (loader) loader.remove();
             }
 
-            // Função para formatar a resposta da IA (vinda do JSON)
+            // Função para formatar a resposta da IA (COM NOVOS BOTÕES)
             function formatAiResponse(prediction) {
                 const isStylish = prediction.predictedLabel;
                 const title = isStylish ? "Look Aprovado! 😎" : "Ponto de Atenção! 🤔";
                 const probability = (prediction.probability * 100).toFixed(1) + "%";
-                // IMPORTANTE: Seu JSON de resposta precisa ter a propriedade "suggestion"
                 const suggestion = prediction.suggestion || (isStylish ? "Você arrasou na combinação!" : "Que tal tentar alguns ajustes?");
 
-                // Retorna o HTML formatado para o balão da IA
+                // Retorna o HTML formatado com os 3 botões
                 return `
-                    <h4 style="margin-top:0; margin-bottom: 10px;">${title}</h4>
-                    <p style="margin-bottom: 12px;">${suggestion}</p>
-                    <small style="opacity: 0.7;">Confiança do modelo: ${probability}</small>
+                    <!-- Este div extra ajuda a pegar o HTML para o log de feedback -->
+                    <div class="ai-response-content">
+                        <h4 style="margin-top:0; margin-bottom: 10px;">${title}</h4>
+                        <p style="margin-bottom: 12px;">${suggestion}</p>
+                        <small style="opacity: 0.7;">Confiança do modelo: ${probability}</small>
+                    </div>
+                    <div class="feedback-actions">
+                        <button class="feedback-btn thumb-up" title="Gostei desta resposta">👍</button>
+                        <button class="feedback-btn thumb-down" title="Não gostei desta resposta">👎</button>
+                        <button class="feedback-btn regenerate" title="Gerar outra resposta">🔄</button>
+                    </div>
                 `;
+            }
+
+            // NOVIDADE: Função para adicionar 'escutas' nos 3 botões
+            function addBubbleListeners(bubble, pergunta, respostaHtml) {
+                const btnThumbUp = bubble.querySelector('.thumb-up');
+                const btnThumbDown = bubble.querySelector('.thumb-down');
+                const btnRegenerate = bubble.querySelector('.regenerate');
+
+                // Ação para "Gostei" (👍)
+                btnThumbUp.addEventListener('click', async () => {
+                    btnThumbUp.classList.add('selected');
+                    btnThumbDown.disabled = true;
+                    btnThumbUp.disabled = true;
+                    btnRegenerate.disabled = true; // Desabilita todos
+
+                    // CHAMA A API DE FEEDBACK
+                    try {
+                        await fetch('/log-feedback', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                Pergunta: pergunta,
+                                RespostaHtml: respostaHtml // Salva o HTML limpo da resposta
+                            })
+                        });
+                        console.log("Feedback útil registrado!");
+                    } catch (error) {
+                        console.error("Falha ao registrar feedback:", error);
+                    }
+                });
+
+                // Ação para "Não Gostei" (👎)
+                btnThumbDown.addEventListener('click', () => {
+                    btnThumbDown.classList.add('selected');
+                    btnThumbDown.disabled = true;
+                    btnThumbUp.disabled = true;
+                    btnRegenerate.disabled = true;
+                });
+
+                // NOVIDADE: Ação para "Regerar Resposta" (🔄)
+                btnRegenerate.addEventListener('click', async () => {
+                    console.log("Regerando resposta para:", lastUserPrompt);
+
+                    // Desabilita os botões do balão ATUAL
+                    btnThumbDown.disabled = true;
+                    btnThumbUp.disabled = true;
+                    btnRegenerate.disabled = true;
+
+                    // Chama a IA novamente com a ÚLTIMA pergunta
+                    await getAiResponse(lastUserPrompt);
+                });
             }
 
             // Função para rolar o chat para o final
             function scrollToBottom() {
                 chatHistory.scrollTop = chatHistory.scrollHeight;
             }
+
+            // Foco no input ao carregar
+            inputTexto.focus();
         });
     </script>
 }

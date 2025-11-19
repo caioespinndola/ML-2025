@@ -10,32 +10,31 @@
         <p class="lead text-muted">Seu assistente de estilo pessoal, pronto para te ajudar a brilhar.</p>
     </div>
 
-   
+    
     <div class="row justify-content-center">
         <div class="col-lg-8 d-flex">
 
-            <
             <div class="chat-container shadow-lg">
+                
                 <div class="chat-history" id="chat-history">
                     <div class="chat-bubble ai">
                         Olá! Descreva seu look e eu te ajudo a analisar.
                     </div>
                 </div>
 
+                
                 <form class="chat-input-area" id="form-analise-texto">
                     <input type="text" id="input-analise-texto" class="chat-input-bar" placeholder="Ex: Calça de alfaiataria bege e camisa de linho...">
+
                     <button type="submit" id="btn-analisar-texto" class="chat-send-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none" /><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
                     </button>
                 </form>
-
             </div>
+
         </div>
     </div>
-    
-
 </div>
-
 
 @section Scripts {
     <script>
@@ -46,22 +45,19 @@
             const inputTexto = document.getElementById("input-analise-texto");
             const btnAnalise = document.getElementById("btn-analisar-texto");
 
-
             let lastUserPrompt = "";
 
-
+            
             formAnalise.addEventListener("submit", async function(e) {
                 e.preventDefault();
                 const userText = inputTexto.value.trim();
                 if (userText === "") return;
 
-
-                lastUserPrompt = userText;
+                lastUserPrompt = userText; 
 
                 appendBubble(userText, 'user');
                 inputTexto.value = "";
                 btnAnalise.disabled = true;
-
 
                 await getAiResponse(userText);
 
@@ -69,7 +65,7 @@
                 inputTexto.focus();
             });
 
-
+            
             async function getAiResponse(prompt) {
                 appendLoader();
 
@@ -88,20 +84,19 @@
 
                     const prediction = await response.json();
 
-
+                    
                     const aiResponseHtml = formatAiResponse(prediction);
 
                     removeLoader();
 
                     
                     if (prompt === lastUserPrompt) {
+                        
                         const previousAiBubbles = chatHistory.querySelectorAll('.chat-bubble.ai:not(#loader)');
-                        if (previousAiBubbles.length > 0) {
-                            
-                            previousAiBubbles[previousAiBubbles.length - 1].remove();
-                        }
+                         
                     }
 
+                    
                     appendBubble(aiResponseHtml, 'ai', prompt);
 
                 } catch (error) {
@@ -111,7 +106,7 @@
                 }
             }
 
-
+            
 
             function appendBubble(content, type, userQuestionContext = null) {
                 const bubble = document.createElement('div');
@@ -119,17 +114,17 @@
                 bubble.innerHTML = content;
                 chatHistory.appendChild(bubble);
 
-
+                
                 if (type === 'ai' && userQuestionContext) {
-
                     
-                    const responseHtmlForLog = bubble.querySelector('.ai-response-content') ? bubble.querySelector('.ai-response-content').innerHTML : content;
+                    const responseContent = bubble.querySelector('.ai-response-content');
+                    const responseHtmlForLog = responseContent ? responseContent.innerHTML : content;
+
                     addBubbleListeners(bubble, userQuestionContext, responseHtmlForLog);
                 }
 
                 scrollToBottom();
             }
-
 
             function appendLoader() {
                 const loaderHtml = `
@@ -144,12 +139,10 @@
                 }
             }
 
-
             function removeLoader() {
                 const loader = document.getElementById("loader");
                 if (loader) loader.remove();
             }
-
 
             function formatAiResponse(prediction) {
                 const isStylish = prediction.predictedLabel;
@@ -157,7 +150,6 @@
                 const probability = (prediction.probability * 100).toFixed(1) + "%";
                 const suggestion = prediction.suggestion || (isStylish ? "Você arrasou na combinação!" : "Que tal tentar alguns ajustes?");
 
-                
                 return `
                     <div class="ai-response-content">
                         <h4 style="margin-top:0; margin-bottom: 10px;">${title}</h4>
@@ -172,31 +164,28 @@
                 `;
             }
 
-
-          function addBubbleListeners(bubble, pergunta, respostaHtml) {
+            
+            function addBubbleListeners(bubble, pergunta, respostaHtml) {
                 const btnThumbUp = bubble.querySelector('.thumb-up');
                 const btnThumbDown = bubble.querySelector('.thumb-down');
                 const btnRegenerate = bubble.querySelector('.regenerate');
 
-                
                 if (!btnRegenerate) return;
 
-                const allButtons = [btnThumbUp, btnThumbDown, btnRegenerate];
-
-
+                
                 function disableButtons() {
-                    allButtons.forEach(btn => {
-                        
-                        if (btn) btn.disabled = true;
-                    });
+                    btnThumbUp.disabled = true;
+                    btnThumbDown.disabled = true;
+                    btnRegenerate.disabled = true;
                 }
 
-
+                
                 btnThumbUp.addEventListener('click', async () => {
                     disableButtons();
                     btnThumbUp.classList.add('selected');
 
-                    appendBubble("Que bom que gostou! Seu feedback positivo nos ajuda a aprender. 😊", 'ai', null);
+                    
+                    appendBubble("Que bom que gostou! 😊", 'ai', null);
 
                     try {
                         await fetch('/log-feedback', {
@@ -204,47 +193,53 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 Pergunta: pergunta,
-                                RespostaHtml: respostaHtml
+                                RespostaHtml: respostaHtml,
+                                Gostou: true 
                             })
                         });
-                        console.log("Feedback útil registrado!");
+                        console.log("Feedback Positivo (TRUE) registrado!");
                     } catch (error) {
-                        console.error("Falha ao registrar feedback:", error);
+                        console.error("Erro ao salvar feedback:", error);
                     }
                 });
 
-
-                btnThumbDown.addEventListener('click', () => {
+                
+                btnThumbDown.addEventListener('click', async () => {
                     disableButtons();
                     btnThumbDown.classList.add('selected');
 
-                    appendBubble("Agradecemos seu feedback. Isso nos motiva a melhorar! 📝", 'ai', null);
+                    
+                    appendBubble("Obrigado pelo feedback. Vamos melhorar! 📝", 'ai', null);
+
+                    try {
+                        await fetch('/log-feedback', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                Pergunta: pergunta,
+                                RespostaHtml: respostaHtml,
+                                Gostou: false 
+                            })
+                        });
+                        console.log("Feedback Negativo (FALSE) registrado!");
+                    } catch (error) {
+                        console.error("Erro ao salvar feedback:", error);
+                    }
                 });
 
-
+                
                 btnRegenerate.addEventListener('click', async () => {
                     console.log("Regerando resposta para:", lastUserPrompt);
-
-                    
                     disableButtons();
-                    btnAnalise.disabled = true;
 
-                    
-                    bubble.remove();
-
-                    
+                   
                     await getAiResponse(lastUserPrompt);
-
-                    btnAnalise.disabled = false;
-                    inputTexto.focus();
                 });
             }
-
 
             function scrollToBottom() {
                 chatHistory.scrollTop = chatHistory.scrollHeight;
             }
-
 
             inputTexto.focus();
         });

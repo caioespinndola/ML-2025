@@ -18,7 +18,7 @@ namespace ML_2025.Services
             _filePath = Path.Combine(env.ContentRootPath, "historico_uteis.json");
         }
 
-        // Mudei a assinatura para aceitar 'bool gostou'
+        
         public async Task AdicionarLogFeedbackAsync(string pergunta, string respostaHtml, bool gostou)
         {
             var novoLog = new FeedbackLog
@@ -27,7 +27,8 @@ namespace ML_2025.Services
                 Timestamp = DateTime.UtcNow,
                 Pergunta = pergunta ?? string.Empty,
                 RespostaHtml = respostaHtml ?? string.Empty,
-                Gostou = gostou // Salva se foi Like ou Dislike
+                Gostou = gostou 
+               
             };
 
             List<FeedbackLog> logs = new List<FeedbackLog>();

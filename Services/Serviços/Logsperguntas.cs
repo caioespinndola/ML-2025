@@ -15,25 +15,25 @@ namespace ML_2025.Services
 
         public FeedbackLogService(IWebHostEnvironment env)
         {
-            // O nome do nosso NOVO arquivo!
             _filePath = Path.Combine(env.ContentRootPath, "historico_uteis.json");
         }
 
-        public async Task AdicionarLogUtilAsync(string pergunta, string respostaHtml)
+        // Mudei a assinatura para aceitar 'bool gostou'
+        public async Task AdicionarLogFeedbackAsync(string pergunta, string respostaHtml, bool gostou)
         {
             var novoLog = new FeedbackLog
             {
                 Id = Guid.NewGuid(),
                 Timestamp = DateTime.UtcNow,
                 Pergunta = pergunta ?? string.Empty,
-                RespostaHtml = respostaHtml ?? string.Empty
+                RespostaHtml = respostaHtml ?? string.Empty,
+                Gostou = gostou // Salva se foi Like ou Dislike
             };
 
             List<FeedbackLog> logs = new List<FeedbackLog>();
 
             lock (_fileLock)
             {
-                // 1. Ler o arquivo antigo (se existir)
                 if (File.Exists(_filePath))
                 {
                     try
@@ -46,14 +46,12 @@ namespace ML_2025.Services
                     }
                     catch (JsonException)
                     {
-                        logs = new List<FeedbackLog>(); // Ignora arquivo corrompido
+                        logs = new List<FeedbackLog>();
                     }
                 }
 
-                // 2. Adicionar o novo log à lista
                 logs.Add(novoLog);
 
-                // 3. Salvar a lista atualizada
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string jsonString = JsonSerializer.Serialize(logs, options);
                 File.WriteAllText(_filePath, jsonString);

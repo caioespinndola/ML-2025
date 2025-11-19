@@ -1,8 +1,8 @@
-﻿// /Services/JsonLogService.cs
+﻿
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json; // <--- Verifique se você tem este 'using'
+using System.Text.Json; 
 using System.Threading.Tasks;
 using ML_2025.Models;
 using Microsoft.AspNetCore.Hosting;

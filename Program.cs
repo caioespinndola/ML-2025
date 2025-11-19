@@ -6,25 +6,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 
-
+// Configuração do Modelo ML
 var pastaModelos = Path.Combine(AppContext.BaseDirectory, "MLModels");
 if (!File.Exists(Path.Combine(pastaModelos, "model.zip")))
     ModelBuilder.Treinar(pastaModelos);
+
 var mlContext = new MLContext();
 var modelPath = Path.Combine(pastaModelos, "model.zip");
 var model = mlContext.Model.Load(modelPath, out _);
 var engine = mlContext.Model.CreatePredictionEngine<SentimentData, SentimentPrediction>(model);
 
-
-
-
-builder.Services.AddSingleton<JsonLogService>();
-
-
-builder.Services.AddSingleton<FeedbackLogService>();
-
-
-
+// Registro dos Serviços
+builder.Services.AddSingleton<JsonLogService>();      // Log Geral
+builder.Services.AddSingleton<FeedbackLogService>();  // Log de Feedback
 builder.Services.AddSingleton(engine);
 
 var app = builder.Build();
@@ -41,12 +35,11 @@ app.UseRouting();
 app.UseAuthorization();
 app.MapRazorPages();
 
-
+// Endpoint de Predição (Salva todas as perguntas)
 app.MapPost("/predict", async (PredictRequest request,
                               PredictionEngine<SentimentData, SentimentPrediction> engine,
                               JsonLogService logService) =>
 {
-    
     await logService.AdicionarLogAsync(request.Text);
 
     var prediction = engine.Predict(new SentimentData { Text = request.Text });
@@ -57,9 +50,9 @@ app.MapPost("/predict", async (PredictRequest request,
 app.MapPost("/log-feedback", async (FeedbackLog request, FeedbackLogService feedbackService) =>
 {
     
-    await feedbackService.AdicionarLogUtilAsync(request.Pergunta, request.RespostaHtml);
+    await feedbackService.AdicionarLogFeedbackAsync(request.Pergunta, request.RespostaHtml, request.Gostou);
+
     return Results.Ok(new { message = "Feedback registrado com sucesso!" });
 });
-
 
 app.Run();

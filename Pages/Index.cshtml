@@ -10,14 +10,11 @@
         <p class="lead text-muted">Seu assistente de estilo pessoal, pronto para te ajudar a brilhar.</p>
     </div>
 
-    <!-- MUDANÇA DE LAYOUT:
-         Removemos a 'row g-5' e substituímos por uma
-         linha centralizada com 8 colunas para o chat.
-    -->
+   
     <div class="row justify-content-center">
         <div class="col-lg-8 d-flex">
 
-            <!-- O HTML do Chat Container não muda -->
+            <
             <div class="chat-container shadow-lg">
                 <div class="chat-history" id="chat-history">
                     <div class="chat-bubble ai">
@@ -35,13 +32,11 @@
             </div>
         </div>
     </div>
-    <!-- FIM DA MUDANÇA DE LAYOUT -->
+    
 
 </div>
 
-<!-- ======================================================= -->
-<!-- JAVASCRIPT ATUALIZADO (com Feedback e Regenerate)     -->
-<!-- ======================================================= -->
+
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -51,30 +46,30 @@
             const inputTexto = document.getElementById("input-analise-texto");
             const btnAnalise = document.getElementById("btn-analisar-texto");
 
-            // Variável para guardar a última pergunta do usuário
+
             let lastUserPrompt = "";
 
-            // --- Lógica de Envio do Chat ---
+
             formAnalise.addEventListener("submit", async function(e) {
                 e.preventDefault();
                 const userText = inputTexto.value.trim();
                 if (userText === "") return;
 
-                // Salva a pergunta do usuário para a função "Regenerate"
+
                 lastUserPrompt = userText;
 
                 appendBubble(userText, 'user');
                 inputTexto.value = "";
                 btnAnalise.disabled = true;
 
-                // Chama a função principal de chat
+
                 await getAiResponse(userText);
 
                 btnAnalise.disabled = false;
                 inputTexto.focus();
             });
 
-            // --- Função Principal para buscar Resposta da IA ---
+
             async function getAiResponse(prompt) {
                 appendLoader();
 
@@ -93,11 +88,20 @@
 
                     const prediction = await response.json();
 
-                    // Formata a resposta da IA (com os novos botões)
+
                     const aiResponseHtml = formatAiResponse(prediction);
 
                     removeLoader();
-                    // Passa o prompt (pergunta) para a função de feedback saber o contexto
+
+                    
+                    if (prompt === lastUserPrompt) {
+                        const previousAiBubbles = chatHistory.querySelectorAll('.chat-bubble.ai:not(#loader)');
+                        if (previousAiBubbles.length > 0) {
+                            
+                            previousAiBubbles[previousAiBubbles.length - 1].remove();
+                        }
+                    }
+
                     appendBubble(aiResponseHtml, 'ai', prompt);
 
                 } catch (error) {
@@ -108,52 +112,53 @@
             }
 
 
-            // --- Funções Auxiliares ---
 
-            // Função para adicionar um balão de chat
             function appendBubble(content, type, userQuestionContext = null) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('chat-bubble', type);
                 bubble.innerHTML = content;
                 chatHistory.appendChild(bubble);
 
-                // Se for um balão da IA, adiciona os 'escutadores' de feedback
+
                 if (type === 'ai' && userQuestionContext) {
-                    // Passa o HTML da resposta para salvar no log de feedback
-                    const responseHtmlForLog = bubble.querySelector('.ai-response-content').innerHTML;
+
+                    
+                    const responseHtmlForLog = bubble.querySelector('.ai-response-content') ? bubble.querySelector('.ai-response-content').innerHTML : content;
                     addBubbleListeners(bubble, userQuestionContext, responseHtmlForLog);
                 }
 
                 scrollToBottom();
             }
 
-            // Função para adicionar o loader
+
             function appendLoader() {
                 const loaderHtml = `
                     <div class="chat-bubble ai loading" id="loader">
                         <div class="gemini-loader"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
                     </div>
                 `;
-                chatHistory.innerHTML += loaderHtml;
-                scrollToBottom();
+                
+                if (!document.getElementById("loader")) {
+                    chatHistory.innerHTML += loaderHtml;
+                    scrollToBottom();
+                }
             }
 
-            // Função para remover o loader
+
             function removeLoader() {
                 const loader = document.getElementById("loader");
                 if (loader) loader.remove();
             }
 
-            // Função para formatar a resposta da IA (COM NOVOS BOTÕES)
+
             function formatAiResponse(prediction) {
                 const isStylish = prediction.predictedLabel;
                 const title = isStylish ? "Look Aprovado! 😎" : "Ponto de Atenção! 🤔";
                 const probability = (prediction.probability * 100).toFixed(1) + "%";
                 const suggestion = prediction.suggestion || (isStylish ? "Você arrasou na combinação!" : "Que tal tentar alguns ajustes?");
 
-                // Retorna o HTML formatado com os 3 botões
+                
                 return `
-                    <!-- Este div extra ajuda a pegar o HTML para o log de feedback -->
                     <div class="ai-response-content">
                         <h4 style="margin-top:0; margin-bottom: 10px;">${title}</h4>
                         <p style="margin-bottom: 12px;">${suggestion}</p>
@@ -167,27 +172,39 @@
                 `;
             }
 
-            // NOVIDADE: Função para adicionar 'escutas' nos 3 botões
-            function addBubbleListeners(bubble, pergunta, respostaHtml) {
+
+          function addBubbleListeners(bubble, pergunta, respostaHtml) {
                 const btnThumbUp = bubble.querySelector('.thumb-up');
                 const btnThumbDown = bubble.querySelector('.thumb-down');
                 const btnRegenerate = bubble.querySelector('.regenerate');
 
-                // Ação para "Gostei" (👍)
-                btnThumbUp.addEventListener('click', async () => {
-                    btnThumbUp.classList.add('selected');
-                    btnThumbDown.disabled = true;
-                    btnThumbUp.disabled = true;
-                    btnRegenerate.disabled = true; // Desabilita todos
+                
+                if (!btnRegenerate) return;
 
-                    // CHAMA A API DE FEEDBACK
+                const allButtons = [btnThumbUp, btnThumbDown, btnRegenerate];
+
+
+                function disableButtons() {
+                    allButtons.forEach(btn => {
+                        
+                        if (btn) btn.disabled = true;
+                    });
+                }
+
+
+                btnThumbUp.addEventListener('click', async () => {
+                    disableButtons();
+                    btnThumbUp.classList.add('selected');
+
+                    appendBubble("Que bom que gostou! Seu feedback positivo nos ajuda a aprender. 😊", 'ai', null);
+
                     try {
                         await fetch('/log-feedback', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 Pergunta: pergunta,
-                                RespostaHtml: respostaHtml // Salva o HTML limpo da resposta
+                                RespostaHtml: respostaHtml
                             })
                         });
                         console.log("Feedback útil registrado!");
@@ -196,34 +213,39 @@
                     }
                 });
 
-                // Ação para "Não Gostei" (👎)
+
                 btnThumbDown.addEventListener('click', () => {
+                    disableButtons();
                     btnThumbDown.classList.add('selected');
-                    btnThumbDown.disabled = true;
-                    btnThumbUp.disabled = true;
-                    btnRegenerate.disabled = true;
+
+                    appendBubble("Agradecemos seu feedback. Isso nos motiva a melhorar! 📝", 'ai', null);
                 });
 
-                // NOVIDADE: Ação para "Regerar Resposta" (🔄)
+
                 btnRegenerate.addEventListener('click', async () => {
                     console.log("Regerando resposta para:", lastUserPrompt);
 
-                    // Desabilita os botões do balão ATUAL
-                    btnThumbDown.disabled = true;
-                    btnThumbUp.disabled = true;
-                    btnRegenerate.disabled = true;
+                    
+                    disableButtons();
+                    btnAnalise.disabled = true;
 
-                    // Chama a IA novamente com a ÚLTIMA pergunta
+                    
+                    bubble.remove();
+
+                    
                     await getAiResponse(lastUserPrompt);
+
+                    btnAnalise.disabled = false;
+                    inputTexto.focus();
                 });
             }
 
-            // Função para rolar o chat para o final
+
             function scrollToBottom() {
                 chatHistory.scrollTop = chatHistory.scrollHeight;
             }
 
-            // Foco no input ao carregar
+
             inputTexto.focus();
         });
     </script>
